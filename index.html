@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Presupuesto · Madrid · Londres · Brighton</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#14233A;
+    --ink-soft:#2b3b54;
+    --paper:#F1EEE6;
+    --card:#FFFFFF;
+    --line:#dcd6c8;
+    --amber:#E8A33D;
+    --amber-deep:#c07e1c;
+    --muted:#6c7689;
+    --uk:#b8472f;
+    font-size:16px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    line-height:1.5;
+    padding:clamp(16px,4vw,56px) clamp(12px,4vw,24px);
+    -webkit-font-smoothing:antialiased;
+  }
+  .sheet{
+    max-width:920px;
+    margin:0 auto;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    box-shadow:0 24px 60px -32px rgba(20,35,58,.45);
+  }
+
+  /* ---- Header / boarding pass ---- */
+  .head{
+    background:var(--ink);
+    color:#fff;
+    padding:clamp(22px,4vw,38px) clamp(20px,4vw,40px) clamp(26px,4vw,40px);
+    position:relative;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.72rem;
+    letter-spacing:.32em;
+    text-transform:uppercase;
+    color:var(--amber);
+  }
+  .head h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-weight:600;
+    font-size:clamp(1.7rem,5vw,2.7rem);
+    line-height:1.05;
+    margin:.5rem 0 .2rem;
+    letter-spacing:-.01em;
+  }
+  .head .sub{color:#9fb0c9;font-size:.95rem;}
+
+  .route{
+    display:flex;flex-wrap:wrap;align-items:center;
+    gap:.5rem .35rem;
+    margin-top:1.4rem;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .stop{display:flex;flex-direction:column;align-items:center;line-height:1.15;}
+  .stop .code{font-size:1rem;font-weight:700;color:#fff;letter-spacing:.05em;}
+  .stop .city{font-size:.6rem;color:#8194af;text-transform:uppercase;letter-spacing:.12em;margin-top:2px;}
+  .dash{flex:1;min-width:14px;height:1px;border-top:1px dashed #43536e;position:relative;top:-6px;}
+  .dash::after{content:"\2708";position:absolute;left:50%;top:-9px;transform:translateX(-50%);font-size:.7rem;color:var(--amber);}
+
+  /* ---- Summary band ---- */
+  .summary{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    border-bottom:1px solid var(--line);
+  }
+  .summary div{padding:clamp(16px,3vw,24px) clamp(20px,4vw,40px);}
+  .summary .total{background:#faf7f0;border-right:1px solid var(--line);}
+  .summary .k{font-family:'JetBrains Mono',monospace;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+  .summary .v{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(1.5rem,4.5vw,2.2rem);margin-top:.25rem;letter-spacing:-.01em;}
+  .summary .v small{font-size:.85rem;font-weight:500;color:var(--muted);}
+  .total .v{color:var(--amber-deep);}
+
+  /* ---- Table ---- */
+  .body{padding:clamp(8px,3vw,20px) clamp(12px,4vw,40px) clamp(20px,4vw,32px);}
+  table{width:100%;border-collapse:collapse;}
+  thead th{
+    font-family:'JetBrains Mono',monospace;
+    font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--muted);text-align:left;
+    padding:1.4rem .5rem .6rem;border-bottom:2px solid var(--ink);
+  }
+  thead th.num{text-align:right;}
+  .group td{
+    padding:1.3rem .5rem .35rem;
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:.78rem;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--ink);
+  }
+  tbody tr.item td{padding:.7rem .5rem;border-bottom:1px solid #efece3;vertical-align:top;}
+  .concepto{font-weight:600;}
+  .detalle{font-size:.82rem;color:var(--muted);margin-top:2px;}
+  td.orig{font-family:'JetBrains Mono',monospace;font-size:.82rem;color:var(--muted);text-align:right;white-space:nowrap;}
+  td.cop{font-family:'JetBrains Mono',monospace;font-weight:500;text-align:right;white-space:nowrap;}
+  tr.subtotal td{padding:.4rem .5rem 1rem;text-align:right;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--muted);}
+  tr.subtotal td b{color:var(--ink);font-weight:700;}
+  tr.uk .concepto::after{content:"UK";font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:.1em;background:var(--uk);color:#fff;padding:1px 5px;border-radius:3px;margin-left:7px;vertical-align:middle;}
+
+  tr.grandtotal td{
+    padding:1.3rem .5rem;border-top:2px solid var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+  }
+  tr.grandtotal .label{font-weight:700;font-size:1rem;letter-spacing:.04em;text-transform:uppercase;}
+  tr.grandtotal .cop{font-weight:700;font-size:1.35rem;color:var(--amber-deep);}
+
+  /* ---- Notes ---- */
+  .notes{
+    background:#faf7f0;border-top:1px solid var(--line);
+    padding:clamp(20px,4vw,32px) clamp(20px,4vw,40px);
+    font-size:.86rem;color:var(--ink-soft);
+  }
+  .notes h2{font-family:'Space Grotesk',sans-serif;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:.8rem;}
+  .notes p{margin-bottom:.6rem;}
+  .notes b{color:var(--ink);}
+  .rates{
+    display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem;
+    font-family:'JetBrains Mono',monospace;font-size:.76rem;
+  }
+  .rates span{background:#fff;border:1px solid var(--line);border-radius:4px;padding:.35rem .7rem;}
+  .rates b{color:var(--amber-deep);}
+
+  /* ---- Responsive ---- */
+  @media (max-width:600px){
+    .summary{grid-template-columns:1fr;}
+    .summary .total{border-right:none;border-bottom:1px solid var(--line);}
+    td.orig{display:none;}
+    thead th.orig-h{display:none;}
+  }
+
+  @media (prefers-reduced-motion:no-preference){
+    .sheet{animation:rise .6s cubic-bezier(.2,.7,.2,1) both;}
+    @keyframes rise{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+  }
+</style>
+</head>
+<body>
+<main class="sheet">
+
+  <header class="head">
+    <div class="eyebrow">Presupuesto de viaje · 2 personas</div>
+    <h1>Madrid · Londres · Brighton</h1>
+    <div class="sub">17 – 29 de julio </div>
+    <div class="route">
+      <div class="stop"><span class="code">MDE</span><span class="city">Medellín</span></div>
+      <span class="dash"></span>
+      <div class="stop"><span class="code">MAD</span><span class="city">Madrid</span></div>
+      <span class="dash"></span>
+      <div class="stop"><span class="code">LON</span><span class="city">Londres</span></div>
+      <span class="dash"></span>
+      <div class="stop"><span class="code">BTN</span><span class="city">Brighton</span></div>
+      <span class="dash"></span>
+      <div class="stop"><span class="code">MAD</span><span class="city">Madrid</span></div>
+      <span class="dash"></span>
+      <div class="stop"><span class="code">MDE</span><span class="city">Medellín</span></div>
+    </div>
+  </header>
+
+  <section class="summary">
+    <div class="total">
+      <div class="k">Total estimado · ambas personas</div>
+      <div class="v">COP 21.005.094</div>
+    </div>
+    <div>
+      <div class="k">Por persona</div>
+      <div class="v">COP 10.502.547</div>
+    </div>
+  </section>
+
+  <section class="body">
+    <table>
+      <thead>
+        <tr>
+          <th>Concepto</th>
+          <th class="num orig-h">Moneda original</th>
+          <th class="num">COP (ambas)</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        <!-- VUELOS -->
+        <tr class="group"><td colspan="3">Vuelos</td></tr>
+        <tr class="item">
+          <td><div class="concepto">Medellín → Madrid (Air Europa)</div><div class="detalle">17 jul → 29 jul · COP 5.615.228 c/u</div></td>
+          <td class="orig">—</td><td class="cop">11.230.456</td>
+        </tr>
+        <tr class="item">
+          <td><div class="concepto">Madrid → Londres (Ryanair)</div><div class="detalle">20 jul · 7:20am · €20 c/u</div></td>
+          <td class="orig">€40</td><td class="cop">160.520</td>
+        </tr>
+        <tr class="item">
+          <td><div class="concepto">Londres → Madrid (Ryanair)</div><div class="detalle">25 jul · 7:35am · €81 c/u</div></td>
+          <td class="orig">€162</td><td class="cop">650.106</td>
+        </tr>
+        <tr class="subtotal"><td colspan="3">Subtotal vuelos · <b>COP 12.041.082</b></td></tr>
+
+        <!-- HOSPEDAJE -->
+        <tr class="group"><td colspan="3">Hospedaje</td></tr>
+        <tr class="item uk">
+          <td><div class="concepto">Londres</div><div class="detalle">~5 noches (con opción de desayuno)</div></td>
+          <td class="orig">—</td><td class="cop">2.500.000</td>
+        </tr>
+        <tr class="item uk">
+          <td><div class="concepto">Brighton</div><div class="detalle">1 noche · 23 jul</div></td>
+          <td class="orig">—</td><td class="cop">477.860</td>
+        </tr>
+        <tr class="subtotal"><td colspan="3">Subtotal hospedaje · <b>COP 2.977.860</b></td></tr>
+
+        <!-- TRANSPORTE -->
+        <tr class="group"><td colspan="3">Transporte local e interurbano</td></tr>
+        <tr class="item uk">
+          <td><div class="concepto">Tren Londres ↔ Brighton (Rail Europe)</div><div class="detalle">23–24 jul · ida y vuelta · US$102,95</div></td>
+          <td class="orig">US$102,95</td><td class="cop">356.310</td>
+        </tr>
+        <tr class="item">
+          <td><div class="concepto">Transporte local Madrid</div><div class="detalle">Abono turístico Zona A · ~8 días</div></td>
+          <td class="orig">€110</td><td class="cop">441.430</td>
+        </tr>
+        <tr class="item uk">
+          <td><div class="concepto">Transporte local Londres / Brighton</div><div class="detalle">Daily cap Zona 1–2 · ~5 días</div></td>
+          <td class="orig">£100</td><td class="cop">464.300</td>
+        </tr>
+        <tr class="subtotal"><td colspan="3">Subtotal transporte · <b>COP 1.262.040</b></td></tr>
+
+        <!-- ENTRADAS -->
+        <tr class="group"><td colspan="3">Entradas</td></tr>
+        <tr class="item uk">
+          <td><div class="concepto">Concierto Madness</div><div class="detalle">23 jul · £51,30 c/u</div></td>
+          <td class="orig">£102,60</td><td class="cop">476.372</td>
+        </tr>
+        <tr class="subtotal"><td colspan="3">Subtotal entradas · <b>COP 476.372</b></td></tr>
+
+        <!-- COMIDA -->
+        <tr class="group"><td colspan="3">Comida</td></tr>
+        <tr class="item">
+          <td><div class="concepto">Madrid</div><div class="detalle">~6 días · €40 c/u por día (gama media)</div></td>
+          <td class="orig">€480</td><td class="cop">1.926.240</td>
+        </tr>
+        <tr class="item uk">
+          <td><div class="concepto">Reino Unido</div><div class="detalle">~5 días · £50 c/u por día (gama media)</div></td>
+          <td class="orig">£500</td><td class="cop">2.321.500</td>
+        </tr>
+        <tr class="subtotal"><td colspan="3">Subtotal comida · <b>COP 4.247.740</b></td></tr>
+
+        <!-- TOTAL -->
+        <tr class="grandtotal">
+          <td class="label">Total · 2 personas</td>
+          <td class="orig"></td>
+          <td class="cop">COP 21.005.094</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer class="notes">
+    <h2>Supuestos y tasas</h2>
+    <p><b>Transporte.</b> En Madrid se calculó el Abono Turístico Zona A (cubre metro, bus y suplemento de aeropuerto): 3 días en la primera estancia + 5 días en la segunda. En Londres, pago con tarjeta contactless aprovechando el tope diario Zona 1–2 (£8,90/día) durante ~5 días, más el bus local en Brighton.</p>
+    <p><b>Comida.</b> Estimado de gama media: ~€40 por persona/día en Madrid (café + menú del día + cena informal) y ~£50 por persona/día en Reino Unido. Es el rubro más fácil de ajustar: comiendo más sencillo baja bastante.</p>
+    <p><b>Nota.</b> El tren a Brighton (US$102,95) se tomó como precio total por las dos personas. No incluye el hospedaje de Madrid.</p>
+    <div class="rates">
+      <span>1 GBP = COP <b>4.643</b></span>
+      <span>1 EUR = COP <b>4.013</b></span>
+      <span>1 USD = COP <b>3.461</b></span>
+    </div>
+  </footer>
+
+</main>
+</body>
+</html>
